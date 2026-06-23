@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Solicitud de Insumos Extraordinarios — Farmacias Chávez</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Arial,sans-serif;font-size:12px;color:#111;background:#f5f7fa}
+.wrap{max-width:820px;margin:0 auto;padding:20px}
+.btn-bar{display:flex;gap:8px;margin-bottom:16px}
+.btn-bar button{padding:8px 20px;border:none;border-radius:5px;cursor:pointer;font-size:12px;font-weight:700;font-family:Arial}
+.btn-print{background:#0c2340;color:#fff}
+.btn-export{background:#166534;color:#fff}
+.btn-add{background:#1e40af;color:#fff}
+.btn-reset{background:#e5e7eb;color:#374151}
+.btn-enviar{background:#b45309;color:#fff;font-size:13px;padding:8px 24px;border:2px solid #92400e}
+.btn-enviar:hover{background:#92400e}
+.btn-enviar:disabled{background:#9ca3af;border-color:#9ca3af;cursor:not-allowed}
+
+/* HEADER */
+.doc-hdr{background:#fff;border:1px solid #e2e8f0;border-top:4px solid #0c2340;padding:16px 20px;margin-bottom:14px;display:flex;justify-content:space-between;align-items:flex-start}
+.doc-hdr h1{font-size:16px;color:#0c2340;margin-bottom:3px}
+.doc-hdr .sub{font-size:10px;color:#666}
+.doc-codes{text-align:right;font-size:10px;color:#555;line-height:1.8}
+
+/* DATOS GENERALES */
+.card{background:#fff;border:1px solid #e2e8f0;border-radius:5px;margin-bottom:12px;overflow:hidden}
+.card-hdr{background:#0c2340;color:#fff;padding:8px 14px;font-size:11px;font-weight:700;letter-spacing:.4px;display:flex;justify-content:space-between;align-items:center}
+.card-body{padding:14px}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.fg{display:flex;flex-direction:column;gap:3px}
+.fg label{font-size:10px;color:#666;text-transform:uppercase;letter-spacing:.4px}
+.fg input,.fg select,.fg textarea{padding:7px 9px;border:1px solid #d1d5db;border-radius:4px;font-size:12px;font-family:Arial;width:100%}
+.fg input:focus,.fg select:focus{outline:none;border-color:#0c2340}
+.req{color:#dc2626}
+
+/* SUCURSAL BLOCK */
+.suc-block{background:#fff;border:1px solid #bfdbfe;border-left:4px solid #1e40af;border-radius:5px;margin-bottom:10px;overflow:hidden}
+.suc-block-hdr{background:#eff6ff;padding:8px 14px;display:flex;justify-content:space-between;align-items:center}
+.suc-block-hdr .suc-label{font-weight:700;color:#1e3a5f;font-size:12px}
+.suc-block-hdr .suc-cod{font-family:monospace;font-size:10px;color:#3b82f6;background:#dbeafe;padding:2px 8px;border-radius:3px;margin-left:8px}
+.suc-block-body{padding:12px 14px}
+.suc-meta{display:grid;grid-template-columns:2fr 1fr 1fr;gap:8px;margin-bottom:10px}
+
+/* ITEMS TABLE */
+.items-wrap{border:1px solid #e5e7eb;border-radius:4px;overflow:hidden}
+.items-hdr{display:grid;grid-template-columns:80px 1fr 70px 100px 32px;gap:0;background:#f3f4f6}
+.items-hdr span{padding:6px 8px;font-size:10px;font-weight:700;color:#374151;text-transform:uppercase;letter-spacing:.3px;border-right:1px solid #e5e7eb}
+.items-hdr span:last-child{border:none;text-align:center}
+.item-row{display:grid;grid-template-columns:80px 1fr 70px 100px 32px;gap:0;border-top:1px solid #f0f0f0;align-items:center}
+.item-row:hover{background:#fafafa}
+.item-row > *{padding:5px 8px;border-right:1px solid #f0f0f0}
+.item-row > *:last-child{border:none;display:flex;justify-content:center}
+.item-cod{font-family:monospace;font-size:10.5px;color:#1e40af;font-weight:600}
+.item-select{font-size:11.5px;padding:4px 6px;border:none;background:transparent;width:100%;font-family:Arial;cursor:pointer;color:#111}
+.item-select:focus{outline:none;background:#fff}
+.item-um{font-size:11px;color:#6b7280;text-align:center}
+.item-qty{width:80px;padding:4px 8px;border:1px solid #d1d5db;border-radius:3px;text-align:center;font-size:12px;font-family:Arial;font-weight:700}
+.item-qty:focus{outline:none;border-color:#1e40af}
+.btn-del-item{width:26px;height:26px;border:none;background:#fee2e2;color:#dc2626;border-radius:4px;cursor:pointer;font-size:14px;line-height:1}
+.btn-add-item{display:flex;align-items:center;justify-content:center;gap:5px;padding:7px;border:1px dashed #93c5fd;background:#f0f9ff;color:#1e40af;cursor:pointer;font-size:11.5px;font-family:Arial;width:100%;border-top:1px solid #e5e7eb}
+.btn-add-item:hover{background:#dbeafe}
+.btn-del-suc{padding:4px 10px;border:1px solid #fca5a5;background:#fff;color:#dc2626;border-radius:4px;cursor:pointer;font-size:11px;font-family:Arial}
+
+/* TOTAL STRIP */
+.total-strip{background:#0c2340;color:#fff;padding:8px 14px;display:flex;justify-content:flex-end;align-items:center;gap:20px;font-size:12px}
+.total-strip strong{font-size:15px}
+
+/* FIRMA */
+.firmas{display:flex;gap:24px;margin-top:24px;padding:0 4px}
+.firma-box{flex:1;text-align:center}
+.firma-line{border-top:1.5px solid #333;margin:40px 0 5px}
+.firma-lbl{font-size:9.5px;color:#555}
+
+@media print{
+  body{background:#fff}
+  .btn-bar,.btn-add-item,.btn-del-item,.btn-del-suc{display:none!important}
+  .wrap{padding:8px}
+  .suc-block{break-inside:avoid}
+  .item-select{border:none}
+  @page{size:A4;margin:10mm}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<div class="btn-bar">
+  <button class="btn-add" onclick="addSucursal()">➕ Agregar sucursal</button>
+  <button class="btn-print" onclick="generarImpresion()">🖨 Imprimir / PDF</button>
+  <button class="btn-export" onclick="exportarCSV()">📥 Exportar CSV</button>
+  <button class="btn-reset" onclick="resetForm()">↺ Limpiar todo</button>
+  <button class="btn-enviar" id="btn-enviar" onclick="enviarSolicitud()">📤 Enviar Solicitud</button>
+</div>
+<div id="send-status" style="display:none;margin-bottom:12px;padding:10px 16px;border-radius:6px;font-size:12px;font-weight:600"></div>
+
+<div class="doc-hdr">
+  <div>
+    <h1>Solicitud de Insumos Extraordinarios</h1>
+    <div class="sub">Farmacias Chávez · Regional Oriente · Puede incluir varias sucursales en una sola solicitud</div>
+  </div>
+  <div class="doc-codes">
+    <div>Formulario: GAD/F-1109</div>
+    <div>Norma: GAD/MP-046</div>
+    <div>Versión: 1.0</div>
+  </div>
+</div>
+
+<!-- DATOS GENERALES -->
+<div class="card">
+  <div class="card-hdr">Datos generales de la solicitud</div>
+  <div class="card-body">
+    <div class="grid3">
+      <div class="fg">
+        <label>Elaborado por <span class="req">*</span></label>
+        <input id="g-elaborador" placeholder="Nombre completo">
+      </div>
+      <div class="fg">
+        <label>Fecha <span class="req">*</span></label>
+        <input id="g-fecha" type="date">
+      </div>
+      <div class="fg">
+        <label>Motivo <span class="req">*</span></label>
+        <select id="g-motivo">
+          <option value="AGOTAMIENTO DE STOCK">Agotamiento de stock</option>
+          <option value="EVENTO ESPECIAL">Evento especial</option>
+          <option value="DAÑO / PÉRDIDA">Daño / pérdida</option>
+          <option value="APERTURA / REMODELACIÓN">Apertura / remodelación</option>
+          <option value="OTRO">Otro</option>
+        </select>
+      </div>
+    </div>
+    <div class="fg" style="margin-top:10px">
+      <label>Observaciones generales</label>
+      <input id="g-obs" placeholder="Observaciones opcionales">
+    </div>
+  </div>
+</div>
+
+<!-- SUCURSALES -->
+<div id="suc-list"></div>
+
+<!-- TOTAL GLOBAL -->
+<div class="total-strip">
+  <span>Total unidades solicitadas:</span>
+  <strong id="grand-total">0</strong>
+</div>
+
+<!-- FIRMAS -->
+<div class="firmas">
+  <div class="firma-box"><div class="firma-line"></div><div class="firma-lbl">Elaborado por / Regente</div></div>
+  <div class="firma-box"><div class="firma-line"></div><div class="firma-lbl">Supervisora Regional</div></div>
+  <div class="firma-box"><div class="firma-line"></div><div class="firma-lbl">Responsable Almacén</div></div>
+  <div class="firma-box"><div class="firma-line"></div><div class="firma-lbl">Responsable Compras</div></div>
+</div>
+
+</div><!-- /wrap -->
+
+<script>
+// ── DATOS ─────────────────────────────────────────────────────────────────────
+var SUCURSALES = [
+  {cod:'5401',suc:'CAÑOTO'},{cod:'5403',suc:'TROMPILLO'},{cod:'5404',suc:'PARAGUA'},
+  {cod:'5405',suc:'MUTUALISTA'},{cod:'5406',suc:'CRISTO REDENTOR'},{cod:'5409',suc:'SANTOS DUMONT'},
+  {cod:'5410',suc:'GRIGOTA'},{cod:'5411',suc:'BENI (HAMACAS)'},{cod:'5414',suc:'KILOMETRO 8'},
+  {cod:'5415',suc:'PLAN 3000'},{cod:'5416',suc:'VILLA 1ERO DE MAYO'},{cod:'5417',suc:'RADIAL 26'},
+  {cod:'5420',suc:'IRALA'},{cod:'5421',suc:'FIDALGA COTOCA'},{cod:'5423',suc:'TRINIDAD'},
+  {cod:'5424',suc:'BAJIO'},{cod:'5427',suc:'EQUIPETROL'},{cod:'5428',suc:'PROSALUD ALEMANA'},
+  {cod:'5430',suc:'24 DE SEPTIEMBRE'},{cod:'5431',suc:'VIEDMA'},{cod:'5432',suc:'VILLA PLAZA'},
+  {cod:'5433',suc:'BENI 4TO. ANILLO'},{cod:'5434',suc:'RAMADA'},{cod:'5436',suc:'ROTONDA MERC MUTUALISTA'},
+  {cod:'5438',suc:'VENTURA MALL'},{cod:'5439',suc:'PIRAI'},{cod:'5440',suc:'POMPEYA BENI'},
+  {cod:'5441',suc:'PAMPA DE LA ISLA'},{cod:'5446',suc:'ALEMANA 7MO ANILLO'},{cod:'5448',suc:'WARNES'},
+  {cod:'5456',suc:'PLAN POCITOS'},{cod:'5457',suc:'RIBERALTA'},{cod:'5459',suc:'HACIENDA'},
+  {cod:'5463',suc:'TARIJA'},{cod:'5465',suc:'YAPACANI (PROV)'},{cod:'5466',suc:'COTOCA (PROV)'},
+  {cod:'5467',suc:'SAN IGNACIO DE VELASCO'},{cod:'5468',suc:'2 DE AGOSTO 8VO. ANILLO'},
+  {cod:'5469',suc:'SUC-84 YACUIBA'},{cod:'5472',suc:'CONDOMINIO SEVILLA'},
+  {cod:'5473',suc:'MACORORO BUSCH'},{cod:'5474',suc:'RADIAL 27'},{cod:'5475',suc:'VIRGEN DE LUJAN'},
+  {cod:'5479',suc:'MAKRO PARQUE'},{cod:'15406',suc:'SUC-103 EL MASTIL (TARIJA)'},
+  {cod:'15410',suc:'SUC-106 PLAZA PRINCIPAL (TARIJA)'},{cod:'15412',suc:'PEDRO VELEZ'},
+  {cod:'15413',suc:'MONTERO (PROV)'},{cod:'15432',suc:'SANTOS DUMONT 7MO ANILLO'},
+  {cod:'15444',suc:'ALTO SAN PEDRO'},{cod:'15445',suc:'FIDALGA (AV. BENI)'},
+  {cod:'15446',suc:'REMANSO III'},{cod:'15448',suc:'LA COLORADA'},
+  {cod:'15452',suc:'CANAL ISUTO'},{cod:'15453',suc:'VIA VIRGEN DE COTOCA'},
+  {cod:'15454',suc:'LAS BRISAS'},{cod:'15456',suc:'URUBO'},
+  {cod:'15457',suc:'PIRAI 6TO ANILLO'},{cod:'15460',suc:'ALEMANA 4TO ANILLO'},
+  {cod:'15463',suc:'MOSCU'},{cod:'15464',suc:'LA GUARDIA'},
+  {cod:'15466',suc:'VALLEGRANDE'},{cod:'15467',suc:'SUC-165 JAIME PAZ (TARIJA)'},
+  {cod:'15468',suc:'PAURITO'},{cod:'15469',suc:'RADIAL 10'},
+  {cod:'15472',suc:'ZOOLOGICO'},{cod:'15474',suc:'CLINICA NIÑO JESUS'},
+  {cod:'15475',suc:'SATELITE NORTE'},{cod:'15478',suc:'SUC-175 CAÑOTO LANDIVAR'},
+  {cod:'15479',suc:'SUC. 177 IRALA RENE MORENO'},{cod:'15480',suc:'SUC-174 ALEMANA 3ER ANILLO'},
+  {cod:'15481',suc:'SANTOS DUMONT 6TO'},{cod:'15482',suc:'SUC-176 PIRAI 2DO. ANILLO'},
+  {cod:'15483',suc:'SUC-178 WARNES CENTRO'},{cod:'15484',suc:'SUC-180 LOS CUSIS'},
+  {cod:'35405',suc:'SUC-188 MEDICAL CENTER'},{cod:'35409',suc:'SUC-192 ROCA Y CORONADO'},
+  {cod:'35419',suc:'SUC. KM9 DOBLE VIA LA GUARDIA'},{cod:'35420',suc:'SUC.202 LOS BOSQUES 5TO ANILLO'},
+  {cod:'35427',suc:'SUC. MERCADO LOS POCITOS'},{cod:'35428',suc:'SUC. PROSALUD LOS LOTES'},
+  {cod:'35430',suc:'SUC. BELGRANO (TARIJA)'},{cod:'99001',suc:'SUC. CHE GUEVARA'}
+].sort(function(a,b){return a.suc.localeCompare(b.suc);});
+
+var CATALOGO = [
+  {cod:'20542',nombre:'AMBIENTADOR EN AEROSOL',um:'PZA'},
+  {cod:'15519',nombre:'BOLIGRAFO AZUL',um:'PZA'},
+  {cod:'15563',nombre:'BOLSA PARA BASURA',um:'PQT'},
+  {cod:'23141',nombre:'BOLSA PARA BASURA EXTRA GRANDE (PLOMA)',um:'PQT'},
+  {cod:'27233',nombre:'BOLSA TIPO CAMISETA EXTRA GRANDE (ENVAPACK)',um:'KG'},
+  {cod:'25645',nombre:'BOLSA TIPO CAMISETA EXTRA GRANDE (INTEXPLAST)',um:'KG'},
+  {cod:'27232',nombre:'BOLSA TIPO CAMISETA GRANDE (ENVAPACK)',um:'KG'},
+  {cod:'25644',nombre:'BOLSA TIPO CAMISETA GRANDE (INTEXPLAST)',um:'KG'},
+  {cod:'27230',nombre:'BOLSA TIPO CAMISETA MEDIANA (ENVAPACK)',um:'KG'},
+  {cod:'25643',nombre:'BOLSA TIPO CAMISETA MEDIANA (INTEXPLAST)',um:'KG'},
+  {cod:'27228',nombre:'BOLSA TIPO CAMISETA PEQUEÑA (ENVAPACK)',um:'KG'},
+  {cod:'25642',nombre:'BOLSA TIPO CAMISETA PEQUEÑA (INTEXPLAST)',um:'KG'},
+  {cod:'27231',nombre:'BOLSA TIPO SOBRE GRANDE (ENVAPACK)',um:'KG'},
+  {cod:'25647',nombre:'BOLSA TIPO SOBRE GRANDE (INTEXPLAST)',um:'KG'},
+  {cod:'27229',nombre:'BOLSA TIPO SOBRE PEQUEÑA (ENVAPACK)',um:'KG'},
+  {cod:'25648',nombre:'BOLSA TIPO SOBRE PEQUEÑA (INTEXPLAST)',um:'KG'},
+  {cod:'15525',nombre:'CINTA ADHESIVA O DIUREX',um:'PZA'},
+  {cod:'18158',nombre:'DETERGENTE EN POLVO',um:'BOL'},
+  {cod:'15535',nombre:'ENGRAPADORA',um:'PZA'},
+  {cod:'15573',nombre:'ESCOBA',um:'PZA'},
+  {cod:'15571',nombre:'ESPONJA DE LIMPIEZA',um:'PQT'},
+  {cod:'15550',nombre:'ESTILETE',um:'PZA'},
+  {cod:'28259',nombre:'ETIQUETA FLUORECENTE',um:'PZA'},
+  {cod:'25532',nombre:'GRAPAS PEQUEÑAS',um:'CJA'},
+  {cod:'15568',nombre:'GUANTES DE LIMPIEZA',um:'PAR'},
+  {cod:'27029',nombre:'JABON LIQUIDO PARA MANOS 5L',um:'PZA'},
+  {cod:'15559',nombre:'LAVANDINA',um:'PZA'},
+  {cod:'20458',nombre:'LIMPIA VIDRIO',um:'PZA'},
+  {cod:'15570',nombre:'LIQUIDO DESINFECTANTE PARA PISO',um:'PZA'},
+  {cod:'26997',nombre:'LIQUIDO SACA SARRO 500 ML',um:'PZA'},
+  {cod:'15547',nombre:'MARCADOR AZUL',um:'PZA'},
+  {cod:'15548',nombre:'MARCADOR NEGRO',um:'PZA'},
+  {cod:'15569',nombre:'MOPA (BRUJA)',um:'PZA'},
+  {cod:'25226',nombre:'PAÑO DE LIMPIEZA',um:'PZA'},
+  {cod:'15554',nombre:'PAPEL CONTINUO SIMPLE',um:'CJA'},
+  {cod:'22614',nombre:'PAPEL HIGIENICO ROLLO GRANDE',um:'PZA'},
+  {cod:'15545',nombre:'RESALTADOR (MULTICOLOR)',um:'PZA'},
+  {cod:'25639',nombre:'ROLLO DE PAPEL PARA FACTURA',um:'PZA'},
+  {cod:'15540',nombre:'SACA GRAPAS',um:'PZA'},
+  {cod:'15523',nombre:'TAMPO METALICO',um:'PZA'},
+  {cod:'15556',nombre:'TIJERA',um:'PZA'},
+  {cod:'15541',nombre:'TINTA PARA TAMPO',um:'PZA'},
+  {cod:'15567',nombre:'TRAPO TRAPEADOR',um:'PZA'},
+  {cod:'15581',nombre:'VASO DESECHABLE',um:'PQT'}
+].sort(function(a,b){return a.nombre.localeCompare(b.nombre);});
+
+// ── STATE ──────────────────────────────────────────────────────────────────────
+var _sucCount = 0;
+var _itemCount = 0;
+
+function init() {
+  document.getElementById('g-fecha').value = new Date().toISOString().split('T')[0];
+  addSucursal();
+}
+
+// ── SUCURSAL BLOCK ─────────────────────────────────────────────────────────────
+function sucOpts(sel) {
+  return '<option value="">Selecciona sucursal...</option>' +
+    SUCURSALES.map(function(s){
+      return '<option value="'+s.cod+'"'+(sel===s.cod?' selected':'')+'>'+s.suc+'</option>';
+    }).join('');
+}
+
+function addSucursal() {
+  _sucCount++;
+  var sid = 'suc-'+_sucCount;
+  var div = document.createElement('div');
+  div.className = 'suc-block'; div.id = sid;
+  div.innerHTML =
+    '<div class="suc-block-hdr">'+
+      '<div style="display:flex;align-items:center;gap:6px">'+
+        '<span class="suc-label">Sucursal '+_sucCount+'</span>'+
+        '<span class="suc-cod" id="lbl-cod-'+sid+'">—</span>'+
+      '</div>'+
+      '<button class="btn-del-suc" onclick="removeSuc(\''+sid+'\')">✕ Quitar</button>'+
+    '</div>'+
+    '<div class="suc-block-body">'+
+      '<div class="suc-meta">'+
+        '<div class="fg"><label>Punto de Venta <span class="req">*</span></label>'+
+          '<select onchange="onSucChange(this,\''+sid+'\')" id="sel-'+sid+'">'+sucOpts('')+'</select></div>'+
+        '<div class="fg"><label>Regente / Responsable</label>'+
+          '<input id="reg-'+sid+'" placeholder="Nombre"></div>'+
+        '<div class="fg"><label>Observación particular</label>'+
+          '<input id="obs-'+sid+'" placeholder="Opcional"></div>'+
+      '</div>'+
+      '<div class="items-wrap">'+
+        '<div class="items-hdr">'+
+          '<span>Cód. Interno</span><span>Insumo</span><span style="text-align:center">U.M.</span>'+
+          '<span style="text-align:center">Cantidad Solicitada</span><span></span>'+
+        '</div>'+
+        '<div id="items-'+sid+'"></div>'+
+        '<button class="btn-add-item" onclick="addItem(\''+sid+'\')">+ Agregar insumo</button>'+
+      '</div>'+
+    '</div>';
+  document.getElementById('suc-list').appendChild(div);
+  addItem(sid); addItem(sid); addItem(sid);
+  updateGrandTotal();
+}
+
+function removeSuc(sid) {
+  var el = document.getElementById(sid);
+  if (el) { el.remove(); updateGrandTotal(); }
+}
+
+function onSucChange(sel, sid) {
+  var cod = sel.value;
+  var lbl = document.getElementById('lbl-cod-'+sid);
+  if (lbl) lbl.textContent = cod || '—';
+}
+
+// ── ITEM ROW ───────────────────────────────────────────────────────────────────
+function catOpts() {
+  return '<option value="">— Selecciona insumo —</option>' +
+    CATALOGO.map(function(c){
+      return '<option value="'+c.cod+'" data-um="'+c.um+'">'+c.nombre+'</option>';
+    }).join('');
+}
+
+function addItem(sid) {
+  _itemCount++;
+  var iid = 'item-'+_itemCount;
+  var row = document.createElement('div');
+  row.className = 'item-row'; row.id = iid;
+  row.innerHTML =
+    '<div class="item-cod" id="icod-'+iid+'">—</div>'+
+    '<div style="padding:4px 6px">'+
+      '<select class="item-select" onchange="onInsChange(this,\''+iid+'\')">'+catOpts()+'</select>'+
+    '</div>'+
+    '<div class="item-um" id="ium-'+iid+'">—</div>'+
+    '<div style="text-align:center">'+
+      '<input class="item-qty" type="number" min="1" placeholder="0" id="iqty-'+iid+'" oninput="updateGrandTotal()">'+
+    '</div>'+
+    '<div>'+
+      '<button class="btn-del-item" onclick="removeItem(\''+iid+'\')" title="Quitar">✕</button>'+
+    '</div>';
+  document.getElementById('items-'+sid).appendChild(row);
+}
+
+function removeItem(iid) {
+  var el = document.getElementById(iid);
+  if (el) { el.remove(); updateGrandTotal(); }
+}
+
+function onInsChange(sel, iid) {
+  var opt = sel.options[sel.selectedIndex];
+  var cod = opt.value || '—';
+  var um  = opt.getAttribute('data-um') || '—';
+  var codEl = document.getElementById('icod-'+iid);
+  var umEl  = document.getElementById('ium-'+iid);
+  if (codEl) codEl.textContent = cod;
+  if (umEl)  umEl.textContent  = um;
+  updateGrandTotal();
+}
+
+function updateGrandTotal() {
+  var total = 0;
+  document.querySelectorAll('.item-qty').forEach(function(el){
+    total += parseInt(el.value)||0;
+  });
+  document.getElementById('grand-total').textContent = total;
+}
+
+// ── COLLECT DATA ───────────────────────────────────────────────────────────────
+function getData() {
+  var secs = document.querySelectorAll('.suc-block');
+  var result = [];
+  secs.forEach(function(sec) {
+    var sid = sec.id;
+    var sel = document.getElementById('sel-'+sid);
+    if (!sel || !sel.value) return;
+    var sucNombre = sel.options[sel.selectedIndex].text;
+    var cod = sel.value;
+    var regente = (document.getElementById('reg-'+sid)||{value:''}).value;
+    var obs = (document.getElementById('obs-'+sid)||{value:''}).value;
+    var items = [];
+    sec.querySelectorAll('.item-row').forEach(function(row) {
+      var iid = row.id;
+      var selIns = row.querySelector('.item-select');
+      var qty = document.getElementById('iqty-'+iid);
+      if (!selIns || !qty) return;
+      var opt = selIns.options[selIns.selectedIndex];
+      if (!opt || !opt.value) return;
+      var q = parseInt(qty.value)||0;
+      if (q <= 0) return;
+      items.push({
+        cod: opt.value,
+        nombre: opt.text,
+        um: opt.getAttribute('data-um')||'',
+        cantidad: q
+      });
+    });
+    if (items.length > 0)
+      result.push({cod:cod, sucursal:sucNombre, regente:regente, obs:obs, items:items});
+  });
+  return result;
+}
+
+// ── IMPRIMIR ───────────────────────────────────────────────────────────────────
+function generarImpresion() {
+  var data = getData();
+  if (!data.length) { alert('Agrega al menos una sucursal con insumos'); return; }
+  var elaborador = document.getElementById('g-elaborador').value||'—';
+  var fecha = document.getElementById('g-fecha').value||'';
+  var motivo = document.getElementById('g-motivo').value;
+  var obs = document.getElementById('g-obs').value;
+  var grandTotal = data.reduce(function(a,s){return a+s.items.reduce(function(b,i){return b+i.cantidad;},0);},0);
+
+  var css =
+    '*{box-sizing:border-box}body{font-family:Arial,sans-serif;font-size:11px;margin:18px;color:#111}'+
+    'h2{font-size:15px;color:#0c2340;margin:0 0 2px}.sub{font-size:10px;color:#666;margin-bottom:12px}'+
+    '.hdr{display:flex;justify-content:space-between;margin-bottom:14px}'+
+    '.codes{text-align:right;font-size:10px;color:#555;line-height:1.8}'+
+    '.info-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:14px}'+
+    '.ib{background:#f5f7fa;padding:7px 10px;border-radius:4px}'+
+    '.il{font-size:9px;color:#888;margin-bottom:2px;text-transform:uppercase}'+
+    '.iv{font-weight:700;color:#0c2340;font-size:12px}'+
+    '.suc-block{border:1px solid #e2e8f0;border-left:4px solid #1e40af;border-radius:4px;margin-bottom:16px;break-inside:avoid}'+
+    '.suc-hdr{background:#eff6ff;padding:7px 12px;display:flex;justify-content:space-between;align-items:center}'+
+    '.suc-name{font-weight:700;color:#1e3a5f;font-size:12px}'+
+    '.suc-cod{font-family:monospace;font-size:10px;color:#3b82f6;background:#dbeafe;padding:2px 7px;border-radius:3px}'+
+    'table{width:100%;border-collapse:collapse;margin:0}'+
+    'th{background:#0c2340;color:#fff;padding:5px 9px;text-align:left;font-size:10px}'+
+    'th:last-child{text-align:center}'+
+    'td{padding:5px 9px;border-bottom:1px solid #f0f2f5;font-size:11px}'+
+    'td:last-child{text-align:center;font-weight:700}'+
+    'tr:nth-child(even) td{background:#f9fafb}'+
+    '.cod{font-family:monospace;font-size:10px;color:#1e40af}'+
+    '.tot{background:#0c2340;color:#fff;padding:7px 12px;display:flex;justify-content:space-between;font-weight:700}'+
+    '.grand{background:#0c2340;color:#fff;padding:8px 14px;display:flex;justify-content:space-between;font-weight:700;font-size:13px;margin-top:14px;border-radius:4px}'+
+    '.sign{display:flex;gap:24px;margin-top:28px}.sign-box{flex:1;text-align:center}'+
+    '.sign-line{border-top:1.5px solid #333;margin:38px 0 4px}.sign-lbl{font-size:9px;color:#555}'+
+    '.noprint{margin-bottom:14px}@media print{.noprint{display:none}body{margin:10px}@page{size:A4;margin:10mm}}';
+
+  var sucBlocks = data.map(function(s) {
+    var rows = s.items.map(function(it,i){
+      return '<tr><td class="cod">'+it.cod+'</td><td>'+it.nombre+'</td><td>'+it.um+'</td><td>'+it.cantidad+'</td></tr>';
+    }).join('');
+    var subtotal = s.items.reduce(function(a,i){return a+i.cantidad;},0);
+    return '<div class="suc-block">'+
+      '<div class="suc-hdr">'+
+        '<span class="suc-name">'+s.sucursal+'</span>'+
+        '<span>'+
+          '<span class="suc-cod">Cód. '+s.cod+'</span>'+
+          (s.regente?' &nbsp; Regente: <strong>'+s.regente+'</strong>':'')+
+          (s.obs?' &nbsp; <em>'+s.obs+'</em>':'')+
+        '</span>'+
+      '</div>'+
+      '<table><thead><tr><th style="width:85px">Cód. Interno</th><th>Insumo</th><th style="width:60px">U.M.</th><th style="width:90px;text-align:center">Cant. Solicitada</th></tr></thead>'+
+      '<tbody>'+rows+'</tbody></table>'+
+      '<div class="tot"><span>Subtotal '+s.sucursal+'</span><span>'+subtotal+' unidades</span></div>'+
+    '</div>';
+  }).join('');
+
+  var body =
+    '<div class="noprint">'+
+      '<button onclick="window.print()" style="padding:7px 18px;background:#0c2340;color:#fff;border:none;border-radius:4px;cursor:pointer;margin-right:8px">Imprimir / Guardar PDF</button>'+
+      '<button onclick="window.close()" style="padding:7px 14px;background:#e5e7eb;border:none;border-radius:4px;cursor:pointer">Cerrar</button>'+
+    '</div>'+
+    '<div class="hdr">'+
+      '<div><h2>Solicitud de Insumos Extraordinarios</h2><div class="sub">Farmacias Chávez · Regional Oriente</div></div>'+
+      '<div class="codes"><div>Formulario: GAD/F-1109</div><div>Norma: GAD/MP-046</div><div>Versión: 1.0</div></div>'+
+    '</div>'+
+    '<div class="info-grid">'+
+      '<div class="ib"><div class="il">Elaborado por</div><div class="iv">'+elaborador+'</div></div>'+
+      '<div class="ib"><div class="il">Fecha</div><div class="iv">'+fecha+'</div></div>'+
+      '<div class="ib"><div class="il">Motivo</div><div class="iv">'+motivo+'</div></div>'+
+      (obs?'<div class="ib" style="grid-column:span 3"><div class="il">Observaciones</div><div class="iv">'+obs+'</div></div>':'')+
+    '</div>'+
+    sucBlocks+
+    '<div class="grand"><span>TOTAL GENERAL SOLICITADO</span><span>'+grandTotal+' unidades · '+data.length+' sucursal'+(data.length>1?'es':'')+'</span></div>'+
+    '<div class="sign">'+
+      '<div class="sign-box"><div class="sign-line"></div><div class="sign-lbl">Elaborado por / Regente</div></div>'+
+      '<div class="sign-box"><div class="sign-line"></div><div class="sign-lbl">Supervisora Regional</div></div>'+
+      '<div class="sign-box"><div class="sign-line"></div><div class="sign-lbl">Responsable Almacén</div></div>'+
+      '<div class="sign-box"><div class="sign-line"></div><div class="sign-lbl">Responsable Compras</div></div>'+
+    '</div>';
+
+  var w = window.open('','_blank','width=920,height=750');
+  w.document.open();
+  w.document.write('<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Solicitud Insumos Extraordinarios</title><style>'+css+'</style></head><body>'+body+'</body></html>');
+  w.document.close();
+}
+
+// ── EXPORTAR CSV ───────────────────────────────────────────────────────────────
+function exportarCSV() {
+  var data = getData();
+  if (!data.length) { alert('Agrega al menos una sucursal con insumos'); return; }
+  var elaborador = document.getElementById('g-elaborador').value||'';
+  var fecha = document.getElementById('g-fecha').value||'';
+  var motivo = document.getElementById('g-motivo').value;
+
+  var csv = 'SOLICITUD DE INSUMOS EXTRAORDINARIOS\n';
+  csv += '"Elaborado por:","'+elaborador+'"\n';
+  csv += '"Fecha:","'+fecha+'"\n';
+  csv += '"Motivo:","'+motivo+'"\n\n';
+  csv += 'SUCURSAL,CODIGO PDV,REGENTE,COD. INTERNO,INSUMO,U.M.,CANTIDAD SOLICITADA\n';
+
+  data.forEach(function(s) {
+    s.items.forEach(function(it) {
+      csv += '"'+s.sucursal+'","'+s.cod+'","'+(s.regente||'')+'","'+it.cod+'","'+it.nombre+'","'+it.um+'",'+it.cantidad+'\n';
+    });
+  });
+
+  var blob = new Blob(['\uFEFF'+csv], {type:'text/csv;charset=utf-8;'});
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'Solicitud_Extraordinaria_'+fecha.replace(/-/g,'')+'.csv';
+  a.click();
+}
+
+// ── CONFIGURACIÓN APPS SCRIPT ──────────────────────────────────────────────────
+var APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwTpt-_4ivDW7V7aZpOWwbjxJeWBZcK4jWmAVTIPlpLXHij_LF2zKPSx24sbo9LD8qoLg/exec';
+
+// ── MOSTRAR ESTADO DE ENVÍO ────────────────────────────────────────────────────
+function setStatus(tipo, msg) {
+  var el = document.getElementById('send-status');
+  var colores = {
+    ok:   {bg:'#dcfce7', color:'#166534', border:'#86efac'},
+    err:  {bg:'#fee2e2', color:'#991b1b', border:'#fca5a5'},
+    load: {bg:'#fef3c7', color:'#92400e', border:'#fcd34d'}
+  };
+  var c = colores[tipo] || colores.load;
+  el.style.display  = msg ? '' : 'none';
+  el.style.background   = c.bg;
+  el.style.color        = c.color;
+  el.style.border       = '1.5px solid ' + c.border;
+  el.textContent = msg || '';
+}
+
+// ── ENVIAR SOLICITUD AL APPS SCRIPT ───────────────────────────────────────────
+function enviarSolicitud() {
+  // Validar campos generales
+  var elaborador = (document.getElementById('g-elaborador').value || '').trim();
+  var fecha      = (document.getElementById('g-fecha').value      || '').trim();
+  var motivo     =  document.getElementById('g-motivo').value;
+  var obsGen     = (document.getElementById('g-obs').value        || '').trim();
+
+  if (!elaborador) { setStatus('err', '⚠️ Completa el campo "Elaborado por"'); return; }
+  if (!fecha)      { setStatus('err', '⚠️ Selecciona la fecha'); return; }
+
+  // Recolectar datos (reutiliza getData())
+  var data = getData();
+  if (!data.length) {
+    setStatus('err', '⚠️ Agrega al menos una sucursal con insumos y cantidad mayor a 0');
+    return;
+  }
+
+  // Construir filas — una por insumo por sucursal
+  var filas = [];
+  data.forEach(function(suc) {
+    suc.items.forEach(function(item) {
+      filas.push({
+        fecha:       fecha,
+        solicitante: elaborador,
+        sucursal:    suc.sucursal + ' (' + suc.cod + ')' +
+                     (suc.regente ? ' — ' + suc.regente : ''),
+        sku:         item.cod,
+        descripcion: item.nombre,
+        cantidad:    item.cantidad,
+        motivo:      motivo + (obsGen ? ' | ' + obsGen : '') +
+                     (suc.obs ? ' | ' + suc.obs : '')
+      });
+    });
+  });
+
+  // Bloquear botón
+  var btn = document.getElementById('btn-enviar');
+  btn.disabled = true;
+  btn.textContent = '⏳ Enviando...';
+  setStatus('load', '⏳ Enviando ' + filas.length + ' fila(s) a Google Sheets...');
+
+  // Enviar en serie
+  var enviados = 0;
+  var errores  = [];
+
+  function enviarSig(idx) {
+    if (idx >= filas.length) {
+      btn.disabled    = false;
+      btn.textContent = '📤 Enviar Solicitud';
+      if (errores.length === 0) {
+        setStatus('ok',
+          '✅ ' + enviados + ' solicitud(es) enviada(s) correctamente. ' +
+          'Quedan PENDIENTES hasta que el responsable las apruebe en Google Sheets.');
+        // Limpiar formulario tras 3 segundos
+        setTimeout(function() {
+          setStatus('', '');
+          resetForm();
+        }, 4000);
+      } else {
+        setStatus('err',
+          '⚠️ ' + enviados + ' enviadas, ' + errores.length +
+          ' con error. Intenta nuevamente.');
+      }
+      return;
+    }
+
+    fetch(APPS_SCRIPT_URL, {
+      method:  'POST',
+      mode:    'no-cors',  // Apps Script no devuelve CORS — la fila igual se guarda
+      headers: {'Content-Type': 'application/json'},
+      body:    JSON.stringify(filas[idx])
+    })
+    .then(function() {
+      enviados++;
+      setStatus('load', '⏳ Enviando... (' + (idx + 1) + '/' + filas.length + ')');
+      enviarSig(idx + 1);
+    })
+    .catch(function(e) {
+      errores.push('Fila ' + (idx + 1));
+      enviarSig(idx + 1);
+    });
+  }
+
+  enviarSig(0);
+}
+
+// ── RESET ──────────────────────────────────────────────────────────────────────
+function resetForm() {
+  if (!confirm('¿Limpiar todo el formulario?')) return;
+  document.getElementById('suc-list').innerHTML = '';
+  document.getElementById('g-elaborador').value = '';
+  document.getElementById('g-obs').value = '';
+  _sucCount = 0; _itemCount = 0;
+  updateGrandTotal();
+  addSucursal();
+}
+
+init();
+</script>
+</body>
+</html>
